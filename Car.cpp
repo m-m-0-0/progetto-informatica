@@ -16,6 +16,7 @@ Car::Car(Type type, int x, int y, int points, int speed) {
 }
 
 void Car::move(Position dir) {
-    setPosition
+    setPosition (getPosition()+ dir);
+
 
 }
