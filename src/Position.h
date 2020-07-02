@@ -13,6 +13,7 @@ public:
     int y;
 
     Position(int, int);
+    Position operator+(const position& a);
 };
 
 #ifndef RACING_POSITION_H
