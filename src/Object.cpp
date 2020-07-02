@@ -4,7 +4,12 @@ Object::Object(Object::Type type, int x, int y, int points){
     this->type = type;
     this->pos = Position(x, y);
 }
-Position Object::getPosition() {
+
+void Object::setPosition(Position p){
+    pos = p;
+}
+
+Position* Object::getPosition() {
     return pos;
 }
 

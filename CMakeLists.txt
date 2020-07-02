@@ -1,10 +1,18 @@
 cmake_minimum_required(VERSION 3.16)
 project(racing)
-set(CMAKE_INCLUDE_PATH ./include)
-set(CMAKE_LIBRARY_PATH ./lib)
-set(CMAKE_BINARY_DIR ./bin)
+
+#set(CMAKE_VERBOSE_MAKEFILE TRUE)
+
+set(CMAKE_INCLUDE_PATH ${PROJECT_SOURCE_DIR}/include)
+set(CMAKE_LIBRARY_PATH ${PROJECT_SOURCE_DIR}/lib)
+set(CMAKE_BINARY_DIR ${PROJECT_SOURCE_DIR}/bin)
+set(CMAKE_SOURCE_DIR ${PROJECT_SOURCE_DIR}/src)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_LIBRARIES "-static -static-libgcc -static-libstdc++")
+file(GLOB SOURCE_FILES ${CMAKE_SOURCE_DIR}/*.cpp ${CMAKE_SOURCE_DIR}/*.h)
 
-#add_executable(${PROJECT_NAME} WIN32 ${SOURCE_FILES})
+add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
-add_executable(racing main.cpp game.h Object.h Position.h Object.cpp Position.cpp)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m64 -O2 -Wall -fPIC")
+target_link_libraries(racing ${CMAKE_BINARY_DIR}/pdcurses.dll)
