@@ -17,16 +17,13 @@ public:
     Car();
     // Car(Object, int);
     Car(Type, int, int, int, int);
-    void move(bool left);//Direction dir
+    void move(Position dir);
     void setSpeed(int);
     int getSpeed();
-    void setPosition(int, int);//TODO la macchina si muove avanti e indietro?
-
 
 private:
 
     int speed;
-
 
 };
 
