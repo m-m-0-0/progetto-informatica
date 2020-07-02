@@ -13,6 +13,8 @@ public:
     Object(Type type, int x, int y, int points);
 
     Position getPosition();
+    
+    bool isColliding(int x1, int y1)
 
 private:
     Position pos;
