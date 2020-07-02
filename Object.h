@@ -14,7 +14,7 @@ public:
 
     Position getPosition();
     
-    bool isColliding(int x, int y)
+    bool isColliding(int x1, int y1)
 
 private:
     Position pos;
