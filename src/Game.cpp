@@ -49,15 +49,15 @@ void Game::setLevel(int l){
 }
 
 void Game::showMessage(std::string message){
-    WINDOW* messagearea = newwin(messageare_height,
+    WINDOW* messagearea = newwin(messagearea_height,
                                  messagearea_width,
-                                 window_height/2 - (messageare_height/2),
+                                 window_height/2 - (messagearea_height/2),
                                  window_width/2 - (messagearea_width/2));
 
     box(messagearea, ACS_VLINE, ACS_HLINE);
     wmove(messagearea, 1, 1);
     waddstr(messagearea, message.c_str());
-    wmove(messagearea, messageare_height-1, (messagearea_width - message.length()) / 3);
+    wmove(messagearea, messagearea_height-1, (messagearea_width - message.length()) / 3);
     waddstr(messagearea, "press any button to continue.");
     wrefresh(messagearea);
     refreshAll();
