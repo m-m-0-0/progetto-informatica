@@ -12,8 +12,12 @@ public:
     int x;
     int y;
 
+    Position();
     Position(int, int);
-    Position operator+(const position& a);
+
+
+    Position operator+(const Position& a);
+    bool operator==(const Position& a) const;
 };
 
 #ifndef RACING_POSITION_H

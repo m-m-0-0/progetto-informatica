@@ -9,17 +9,18 @@ public:
         Obstacle,
         Powerup
     };
-
-    Object(Type type, int x, int y, int points);
+    Object();
+    Object(Type type, int x, int y, int points, char character);
 
     Position getPosition();
-    
-    bool isColliding(int x1, int y1)
+    void setPosition(Position);
+    bool isColliding(Object);
 
-private:
-    Position pos;
+protected:
+    Position pos = Position(0, 0);
     int points;
     enum Type type;
+    char character;
 };
 
 #endif
