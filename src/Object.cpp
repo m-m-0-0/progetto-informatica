@@ -13,6 +13,14 @@ Object::Object(Object::Type type, int x, int y, int points, char character){
     this->character = character;
 }
 
+Object::Type Object::getType() {
+    return type;
+}
+
+void Object::setType(Type t) {
+    type = t;
+}
+
 void Object::setPosition(Position p){
     pos = p;
 }

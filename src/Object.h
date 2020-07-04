@@ -13,6 +13,8 @@ public:
     Object();
     Object(Type type, int x, int y, int points, char character);
 
+    Type getType();
+    void setType(Type);
     Position getPosition();
     void setPosition(Position);
     char getCharacter();
