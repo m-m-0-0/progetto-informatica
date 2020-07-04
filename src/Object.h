@@ -9,11 +9,14 @@ public:
         Obstacle,
         Powerup
     };
+
     Object();
     Object(Type type, int x, int y, int points, char character);
 
     Position getPosition();
     void setPosition(Position);
+    char getCharacter();
+    void setCharacter(char);
     bool isColliding(Object);
 
 protected:

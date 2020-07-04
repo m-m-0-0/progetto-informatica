@@ -21,6 +21,16 @@ Position Object::getPosition() {
     return pos;
 }
 
+char Object::getCharacter() {
+    return character;
+}
+
+void Object::setCharacter(char c) {
+    character = c;
+}
+
+
+
 bool Object::isColliding(Object obj) {
     return obj.getPosition() == getPosition();
 }
