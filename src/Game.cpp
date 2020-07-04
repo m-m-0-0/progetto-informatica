@@ -2,13 +2,20 @@
 #include "Car.h"
 #include "Obstacle.h"
 #include "Powerup.h"
+#include "utilities.h"
 #include "../include/curses.h"
 #include <string>
 #include "stdlib.h"
 #include "time.h"
+#include <chrono>
+
+
+
 
 const int START_Y = 1;
-const int DIST_Y = 10;
+const int DIST_Y = 15;
+
+const int FPS = 15;
 
 Game::Game(int w_y, int w_x){
     window_height = w_y;
@@ -75,21 +82,21 @@ void Game::showMessage(std::string message){
     refreshAll();
 }
 
-void Game::generateLevel(int level, int obj_n){
-    Object** L = new Object*[obj_n];
+void Game::generateLevel(int level, int n){
+    Object** L = new Object*[n];
     Object* obj;
     int rnd, x, y, points;
 
-    for(int i=0; i < obj_n; i++){
+    for(int i=0; i < n; i++){
         x = rand()%playarea_width;
-        y = START_Y + (i * DIST_Y);
+        y = START_Y + ((i+1) * DIST_Y);
         points = level * 10;
 
         rnd = rand()%10;
         if (rnd <= 3)
-            obj = (Object*)(new Car(x, y, points));
+            obj = (Object*)(new Car(x, y, -points * 2));
         else if (rnd <= 7)
-            obj = (Object*)(new Obstacle(x, y, points));
+            obj = (Object*)(new Obstacle(x, y, -points));
         else
             obj = (Object*)(new Powerup(x, y, points));
 
@@ -97,6 +104,7 @@ void Game::generateLevel(int level, int obj_n){
     }
 
     ObjArray = L;
+    obj_n = n;
 }
 
 void Game::init(){
@@ -124,11 +132,47 @@ void Game::init(){
     generateLevel(1, 100);
 
     refresh();
-    getch();
-    endwin();
 }
 
 void Game::drawObject(WINDOW* w, Object obj) {
-    wmove(w, obj.getPosition().x, obj.getPosition().y);
+    Position pos = Utilities::to_ncurses_coord(playarea, obj.getPosition());
+    wmove(w, pos.y, pos.x);
     waddch(w, obj.getCharacter());
+}
+
+[[noreturn]] void Game::start(){
+    init();
+
+    Object *curr_obj;
+    double sleep_ms = (double)1/FPS;
+    double delta_t;
+    int min_y;
+    int max_y;
+
+    //main game loop
+    while(true) {
+        auto t1 = std::chrono::high_resolution_clock::now();
+        min_y = y_scroll;
+        max_y = min_y + playarea_height;
+
+        werase(playarea);
+        box(playarea, ACS_VLINE, ACS_HLINE);
+        for (int i = 0; i < obj_n; i++) {
+            curr_obj = ObjArray[i];
+
+            if (curr_obj == NULL)
+                continue;
+
+            if (curr_obj->getPosition().y >= min_y && curr_obj->getPosition().y < max_y) {
+                drawObject(playarea, (curr_obj->translate(Position(0, -y_scroll))));
+            }
+        }
+        y_scroll += 1;
+        setScore(y_scroll);
+        auto t2 = std::chrono::high_resolution_clock::now();
+        delta_t = std::chrono::duration<double, std::milli>(t2-t1).count();
+        Utilities::sleep_for(sleep_ms-delta_t);
+        refreshAll();
+    }
+    getch();
 }

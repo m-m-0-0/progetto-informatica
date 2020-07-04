@@ -19,11 +19,15 @@ private:
     int messagearea_width = 40;
     int messagearea_height = 6;
 
+
     WINDOW* stdscr;
     WINDOW* playarea;
     WINDOW* infoarea;
 
+    int y_scroll = 1;
+
     Object** ObjArray;
+    int obj_n;
 public:
     Game(int, int);
     void init();
@@ -40,6 +44,8 @@ public:
     void setLevel(int);
 
     void showMessage(std::string);
+
+    [[noreturn]] void start();
 };
 
 #endif //GAME_OBJECT_H
