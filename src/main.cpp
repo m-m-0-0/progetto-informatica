@@ -1,6 +1,5 @@
 #include "Game.h"
-#include "Object.h"
-#include <iostream>
+
 int main() {
     Game* g;
 
