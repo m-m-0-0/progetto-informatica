@@ -1,4 +1,3 @@
-<<<<<<< HEAD:src/Car.cpp
 #include "Car.h"
 
 Car::Car(){
