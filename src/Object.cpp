@@ -30,7 +30,13 @@ void Object::setCharacter(char c) {
 }
 
 
-
 bool Object::isColliding(Object obj) {
     return obj.getPosition() == getPosition();
+}
+
+Object Object::translate(Position pos) {
+    Object* obj = new Object();
+    obj->setCharacter(getCharacter());
+    obj->setPosition(getPosition() + pos);
+    return *obj;
 }

@@ -17,7 +17,10 @@ public:
     void setPosition(Position);
     char getCharacter();
     void setCharacter(char);
+
     bool isColliding(Object);
+
+    Object translate(Position);
 
 protected:
     Position pos = Position(0, 0);
