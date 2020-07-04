@@ -1,5 +1,5 @@
-#ifndef UNTITLED_OBSTACLE_H
-#define UNTITLED_OBSTACLE_H
+#ifndef UNTITLED_POWERUP_H
+#define UNTITLED_POWERUP_H
 
 #include "Object.h"
 
