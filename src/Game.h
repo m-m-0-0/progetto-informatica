@@ -1,8 +1,9 @@
 #ifndef GAME_OBJECT_H
+#define GAME_OBJECT_H
+
 #include "../include/curses.h"
 #include "Object.h"
 #include <string>
-#define GAME_OBJECT_H
 
 class Game{
 private:
@@ -22,9 +23,11 @@ private:
     WINDOW* playarea;
     WINDOW* infoarea;
 
+    Object** ObjArray;
 public:
     Game(int, int);
     void init();
+    void generateLevel(int, int);
     void refreshAll();
     void drawObject(WINDOW*, Object);
 

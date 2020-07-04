@@ -1,7 +1,14 @@
-#define PDC_DLL_BUILD
 #include "Game.h"
-#include <string>
+#include "Car.h"
+#include "Obstacle.h"
+#include "Powerup.h"
 #include "../include/curses.h"
+#include <string>
+#include "stdlib.h"
+#include "time.h"
+
+const int START_Y = 1;
+const int DIST_Y = 10;
 
 Game::Game(int w_y, int w_x){
     window_height = w_y;
@@ -68,7 +75,32 @@ void Game::showMessage(std::string message){
     refreshAll();
 }
 
+void Game::generateLevel(int level, int obj_n){
+    Object** L = new Object*[obj_n];
+    Object* obj;
+    int rnd, x, y, points;
+
+    for(int i=0; i < obj_n; i++){
+        x = rand()%playarea_width;
+        y = START_Y + (i * DIST_Y);
+        points = level * 10;
+
+        rnd = rand()%10;
+        if (rnd <= 3)
+            obj = (Object*)(new Car(x, y, points));
+        else if (rnd <= 7)
+            obj = (Object*)(new Obstacle(x, y, points));
+        else
+            obj = (Object*)(new Powerup(x, y, points));
+
+        L[i] = (Object*)obj;
+    }
+
+    ObjArray = L;
+}
+
 void Game::init(){
+    srand(time(0));
 
     //initialize window
     stdscr = initscr();
@@ -88,7 +120,8 @@ void Game::init(){
     refreshAll();
     showMessage("game initialized.");
 
-    //initialize car
+    //generate level
+    generateLevel(1, 100);
 
     refresh();
     getch();
@@ -96,6 +129,6 @@ void Game::init(){
 }
 
 void Game::drawObject(WINDOW* w, Object obj) {
-    wmove(w, obj.getPosition()->x, obj.getPosition()->y);
-    waddch(w, obj.character);
+    wmove(w, obj.getPosition().x, obj.getPosition().y);
+    waddch(w, obj.getCharacter());
 }
