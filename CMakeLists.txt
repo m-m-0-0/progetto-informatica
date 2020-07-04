@@ -12,7 +12,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_LIBRARIES "-static -static-libgcc -static-libstdc++")
 file(GLOB SOURCE_FILES ${CMAKE_SOURCE_DIR}/*.cpp ${CMAKE_SOURCE_DIR}/*.h)
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES} src/Powerup.cpp src/Obstacle.cpp)
+add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m64 -O2 -Wall -fPIC")
 target_link_libraries(racing ${CMAKE_BINARY_DIR}/pdcurses.dll)
