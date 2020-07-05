@@ -6,7 +6,7 @@ Object::Object(){
     this->character = ' ';
 }
 
-Object::Object(Object::Type type, int x, int y, int points, char character){
+Object::Object(Object::Type type, int x, int y, int points, unsigned long character){
     this->type = type;
     this->pos = Position(x, y);
     this->points = points;
@@ -29,11 +29,11 @@ Position Object::getPosition() {
     return pos;
 }
 
-char Object::getCharacter() {
+unsigned long Object::getCharacter() {
     return character;
 }
 
-void Object::setCharacter(char c) {
+void Object::setCharacter(unsigned long c) {
     character = c;
 }
 

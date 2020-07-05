@@ -11,14 +11,14 @@ public:
     };
 
     Object();
-    Object(Type type, int x, int y, int points, char character);
+    Object(Type type, int x, int y, int points, unsigned long character);
 
     Type getType();
     void setType(Type);
     Position getPosition();
     void setPosition(Position);
-    char getCharacter();
-    void setCharacter(char);
+    unsigned long getCharacter();
+    void setCharacter(unsigned long);
 
     bool isColliding(Object);
 
@@ -28,7 +28,7 @@ protected:
     Position pos = Position(0, 0);
     int points;
     enum Type type;
-    char character;
+    unsigned long character;
 };
 
 #endif
