@@ -1,10 +1,22 @@
-#ifndef RACING_PLAYER_H
-#define RACING_PLAYER_H
+
+#ifndef UNTITLED_PLAYER_H
+#define UNTITLED_PLAYER_H
 
 
-class Player {
+#include "Object.h"
+#include "Car.h"
 
+class Player : public Car {
+public:
+    Player(int, int, int);
+    int getLife();
+    void setLife(int);
+
+    void addLife(Object);
+    void removeLife();
+
+protected:
+    int life;
 };
 
-
-#endif //RACING_PLAYER_H
+#endif //UNTITLED_PLAYER_H
