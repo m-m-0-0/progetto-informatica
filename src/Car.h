@@ -3,7 +3,7 @@
 
 #include "Object.h"
 
-class Car: Object{
+class Car: public Object{
 public:
     Car();
     Car(int, int, int, int);
