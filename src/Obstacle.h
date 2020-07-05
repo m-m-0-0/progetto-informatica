@@ -3,7 +3,7 @@
 
 #include "Object.h"
 
-class Obstacle : Object {
+class Obstacle : public Object {
 public:
     Obstacle(int x, int y, int score);
 
