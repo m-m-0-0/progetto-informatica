@@ -4,7 +4,7 @@ Powerup::Powerup(int x, int y, int points){
     this->type = Type::Powerup;
     this->points = points;
     this->pos = Position(x, y);
-    this->character = '@';
+    this->character = 'O';
 }
 
 void Powerup::setPoints(int p) {
