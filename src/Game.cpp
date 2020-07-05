@@ -7,15 +7,16 @@
 #include <string>
 #include "stdlib.h"
 #include "time.h"
+#include "Player.h"
 #include <chrono>
 
 
 
 
 const int START_Y = 1;
-const int DIST_Y = 15;
+const int DIST_Y = 10;
 
-const int FPS = 15;
+const int FPS = 30;
 
 Game::Game(int w_y, int w_x){
     window_height = w_y;
@@ -63,6 +64,7 @@ void Game::setLevel(int l){
 }
 
 void Game::showMessage(std::string message){
+    nodelay(stdscr, false);
     WINDOW* messagearea = newwin(messagearea_height,
                                  messagearea_width,
                                  window_height/2 - (messagearea_height/2),
@@ -79,6 +81,7 @@ void Game::showMessage(std::string message){
     delwin(messagearea);
     touchwin(playarea);
     touchwin(infoarea);
+    nodelay(stdscr, true);
     refreshAll();
 }
 
@@ -110,14 +113,24 @@ void Game::generateLevel(int level, int n){
 void Game::init(){
     srand(time(0));
 
+
     //initialize window
     stdscr = initscr();
     resize_window(stdscr, window_height, window_width);
     resize_term(window_height, window_width);
 
+    nodelay(stdscr, true);
+    keypad(stdscr, true);
+    start_color();
+    curs_set(0);
+    noecho();
+
     //initialize playarea
     playarea = newwin(playarea_height, playarea_width, 1, 1);
     box(playarea, ACS_VLINE, ACS_HLINE);
+
+    nodelay(playarea, true);
+    keypad(playarea, true);
 
     //initialize infoarea
     infoarea = newwin(infoarea_height, infoarea_width, playarea_height+1, 1);
@@ -142,6 +155,7 @@ void Game::drawObject(WINDOW* w, Object obj) {
 
 [[noreturn]] void Game::start(){
     init();
+    player = new Player(playarea_width/2, 2, 10);
 
     Object *curr_obj;
     double sleep_ms = (double)1/FPS;
@@ -152,23 +166,42 @@ void Game::drawObject(WINDOW* w, Object obj) {
     //main game loop
     while(true) {
         auto t1 = std::chrono::high_resolution_clock::now();
-        min_y = y_scroll;
+        min_y = (int)y_scroll;
         max_y = min_y + playarea_height;
+        input.getInput();
+
 
         werase(playarea);
         box(playarea, ACS_VLINE, ACS_HLINE);
+
+        if(input.isPressed(KEY_RIGHT))
+            player->move(Position(1,0));
+        if(input.isPressed(KEY_LEFT))
+            player->move(Position(-1,0));
+
+        drawObject(playarea, *player);
+
         for (int i = 0; i < obj_n; i++) {
             curr_obj = ObjArray[i];
 
             if (curr_obj == NULL)
                 continue;
 
-            if (curr_obj->getPosition().y >= min_y && curr_obj->getPosition().y < max_y) {
-                drawObject(playarea, (curr_obj->translate(Position(0, -y_scroll))));
+            if (curr_obj->getPosition().y > min_y && curr_obj->getPosition().y < max_y) {
+                if((y_scroll - (int)y_scroll <= 1e-3) && (int)y_scroll% 2 == 0 && curr_obj->getType() == Object::Type::Car){ //move the cars forward and randomly left or right
+                    Car* c = (Car*)curr_obj;
+                    int dir = rand() % 2;
+                    if(dir && c->getPosition().x != playarea_width - 1)
+                        c->move(Position(1, 1));
+                    else if(!dir && c->getPosition().x != 1)
+                        c->move(Position(-1, 1));
+
+                }
+                drawObject(playarea, (curr_obj->translate(Position(0, -(int)y_scroll))));
             }
         }
-        y_scroll += 1;
-        setScore(y_scroll);
+        y_scroll += y_speed;
+        setScore((int)y_scroll);
         auto t2 = std::chrono::high_resolution_clock::now();
         delta_t = std::chrono::duration<double, std::milli>(t2-t1).count();
         Utilities::sleep_for(sleep_ms-delta_t);

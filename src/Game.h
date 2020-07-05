@@ -3,10 +3,15 @@
 
 #include "../include/curses.h"
 #include "Object.h"
+#include "Input.h"
+#include "Player.h"
 #include <string>
 
 class Game{
 private:
+    Player* player;
+    Input input;
+
     int level;
     int score;
 
@@ -24,7 +29,8 @@ private:
     WINDOW* playarea;
     WINDOW* infoarea;
 
-    int y_scroll = 1;
+    double y_scroll = 1;
+    double y_speed = 0.2;
 
     Object** ObjArray;
     int obj_n;
