@@ -3,7 +3,7 @@
 
 #include "Object.h"
 
-class Powerup : Object {
+class Powerup : public Object {
 public:
     Powerup(int x, int y, int score);
 
