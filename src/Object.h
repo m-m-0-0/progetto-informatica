@@ -19,6 +19,8 @@ public:
     void setPosition(Position);
     unsigned long getCharacter();
     void setCharacter(unsigned long);
+    bool isActive();
+    void setActive(bool);
 
     bool isColliding(Object);
 
@@ -29,6 +31,7 @@ protected:
     int points;
     enum Type type;
     unsigned long character;
+    bool active;
 };
 
 #endif

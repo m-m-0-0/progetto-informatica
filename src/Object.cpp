@@ -37,6 +37,13 @@ void Object::setCharacter(unsigned long c) {
     character = c;
 }
 
+bool Object::isActive(){
+    return active;
+}
+
+void Object::setActive(bool status){
+    active = status;
+}
 
 bool Object::isColliding(Object obj) {
     return obj.getPosition() == getPosition();
