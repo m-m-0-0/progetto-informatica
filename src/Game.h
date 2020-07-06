@@ -14,6 +14,7 @@ private:
 
     int level;
     int score;
+    long int base_seed;
 
     int window_width;
     int window_height;
@@ -22,7 +23,7 @@ private:
     int infoarea_width;
     int infoarea_height;
     int messagearea_width = 40;
-    int messagearea_height = 6;
+    int messagearea_height = 8;
 
 
     WINDOW* stdscr;
@@ -34,10 +35,11 @@ private:
 
     Object** ObjArray;
     int obj_n;
+
 public:
     Game(int, int);
     void init();
-    void generateLevel(int, int);
+    void generateLevel(int, bool);
     void refreshAll();
     void drawObject(WINDOW*, Object);
 
@@ -48,10 +50,17 @@ public:
 
     void setScore(int);
     void setLevel(int);
+    int getBaseSeed();
+    void setBaseSeed(int seed);
+    int getLevelSeed(int);
+    int getYStart(int);
+    int getYDist(int);
 
     void showMessage(std::string);
 
     [[noreturn]] void start();
+
+    void generateLevel(int level, int start_y, int dist_y, bool cont);
 };
 
 #endif //GAME_OBJECT_H
