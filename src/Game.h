@@ -60,7 +60,9 @@ public:
 
     [[noreturn]] void start();
 
-    void generateLevel(int level, int start_y, int dist_y, bool cont);
+    void updateLife(int l);
+
+    void generateLevel(int level, bool cont, bool first);
 };
 
 #endif //GAME_OBJECT_H

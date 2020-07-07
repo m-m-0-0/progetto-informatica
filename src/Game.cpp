@@ -62,11 +62,21 @@ void Game::setScore(int s) {
 void Game::setLevel(int l){
     level = l;
     std::string level_str = std::to_string(l);
-    wmove(infoarea, 3, 1);
+    wmove(infoarea, 2, 1);
+    wdeleteln(infoarea);
     waddstr(infoarea, "level: ");
     waddstr(infoarea, level_str.c_str());
+    box(infoarea, ACS_VLINE, ACS_HLINE);
 }
 
+void Game::updateLife(int l){
+    std::string life_str = std::to_string(l);
+    wmove(infoarea, 3, 1);
+    wdeleteln(infoarea);
+    waddstr(infoarea, "life: ");
+    waddstr(infoarea, life_str.c_str());
+    box(infoarea, ACS_VLINE, ACS_HLINE);
+}
 int Game::getBaseSeed(){
     return base_seed;
 }
@@ -108,11 +118,12 @@ void Game::showMessage(std::string message){
     refreshAll();
 }
 
-void Game::generateLevel(int level, int y_start, int y_dist, bool cont=false) {
+void Game::generateLevel(int level, bool cont=false, bool first=false) {
     Object **L;
     int n = OBJ_PER_LEVEL;
     L = new Object *[n];
-
+    int y_start = getYStart(level);
+    int y_dist = getYDist(level);
     //if not a continuation of the current level, set the rand seed to the level seed.
     //this is done to make sure each level is generated randomly, but that each level
     //will be generated in the same way for the same execution of the game.
@@ -126,14 +137,14 @@ void Game::generateLevel(int level, int y_start, int y_dist, bool cont=false) {
 
     int active_n = 0;
      for(int i=0; i<n; i++) {
-         if (cont && ObjArray[i]->isActive()) {
+         if (!first && ObjArray[i]->isActive()) {
              ObjArray[i]->setPosition(ObjArray[i]->getPosition() + Position(0, -y_scroll));
              L[active_n++] = ObjArray[i];
          }
      }
      for(int i=active_n; i<n; i++){
          //generate the level randomly
-         x = rand() % playarea_width;
+         x = (rand() % (playarea_width - 2)) + 1;
          y = y_start + ((i + 1) * y_dist);
 
          rnd = rand() % 10;
@@ -157,8 +168,7 @@ void Game::generateLevel(int level, int y_start, int y_dist, bool cont=false) {
 
 void Game::init() {
     setBaseSeed(time(0));
-    level = 1;
-    score = 0;
+    ObjArray = new Object*{NULL};
 
     //initialize window
     stdscr = initscr();
@@ -194,7 +204,7 @@ void Game::init() {
     showMessage("O +100 punti\n X -150 punti\n A -200 punti\n ogni 1000 punti sali di\n un livello.\n buona fortuna!");
 
     //generate level
-    generateLevel(level, getYStart(level), getYDist(level));
+    generateLevel(level, false, true);
 
     setScore(0);
     setLevel(1);
@@ -272,7 +282,7 @@ void Game::drawObject(WINDOW *w, Object obj) {
                     else
                         player->removeLife();
 
-                    score += curr_obj->getPoints();
+                    setScore(score + curr_obj->getPoints());
                     curr_obj->setActive(false);
                 }
                 //draw the object
@@ -282,7 +292,7 @@ void Game::drawObject(WINDOW *w, Object obj) {
 
         //if we're getting to the end of the generated portion of the level, generate more of it
         if (y_scroll > (getYStart(level) + (getYDist(level) * OBJ_PER_LEVEL)) - getYDist(level) * 10) {
-            generateLevel(level, getYStart(level), getYDist(level), true);
+            generateLevel(level, true, false);
             y_scroll = 0;
         }
 
@@ -290,8 +300,13 @@ void Game::drawObject(WINDOW *w, Object obj) {
         y_scroll += y_speed * (level / 5.0) + 0.2;
 
         setScore(score);
-        level = (score / 1000) + 1;
-        setLevel(level);
+        if(score / 100 + 1 != level) {
+            setLevel(score / 100 + 1);
+            generateLevel(level);
+        }
+
+        updateLife(player->getLife());
+
         //sleep to mantain constant framerate;
         auto t2 = std::chrono::high_resolution_clock::now();
         delta_t = std::chrono::duration<double, std::milli>(t2 - t1).count();
