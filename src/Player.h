@@ -12,7 +12,7 @@ public:
     int getLife();
     void setLife(int);
 
-    void addLife(Object);
+    void addLife();
     void removeLife();
 
 protected:

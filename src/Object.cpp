@@ -29,12 +29,28 @@ Position Object::getPosition() {
     return pos;
 }
 
+int Object::getPoints(){
+    return points;
+}
+
+void Object::setPoints(int p) {
+    points = p;
+}
+
 unsigned long Object::getCharacter() {
     return character;
 }
 
 void Object::setCharacter(unsigned long c) {
     character = c;
+}
+
+int Object::getColorPair() {
+    return color_pair;
+}
+
+void Object::setColorPair(int c) {
+    color_pair = c;
 }
 
 bool Object::isActive(){

@@ -2,6 +2,11 @@
 #define OBJECT_OBJECT_H
 #include "Position.h"
 
+const int PLAYER_PAIR = 0;
+const int CAR_PAIR = 1;
+const int OBSTACLE_PAIR = 2;
+const int POWERUP_PAIR = 3;
+
 class Object{
 public:
     enum class Type{
@@ -17,8 +22,12 @@ public:
     void setType(Type);
     Position getPosition();
     void setPosition(Position);
+    int getPoints();
+    void setPoints(int);
     unsigned long getCharacter();
     void setCharacter(unsigned long);
+    int getColorPair();
+    void setColorPair(int);
     bool isActive();
     void setActive(bool);
 
@@ -31,6 +40,7 @@ protected:
     int points;
     enum Type type;
     unsigned long character;
+    int color_pair;
     bool active;
 };
 

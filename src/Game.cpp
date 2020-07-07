@@ -11,8 +11,6 @@
 #include <chrono>
 
 
-
-
 const int Y_START = 1;
 const int Y_DIST = 10;
 const int OBJ_PER_LEVEL = 100;
@@ -27,12 +25,16 @@ Game::Game(int w_y, int w_x){
 
     infoarea_height = 5;
     infoarea_width = window_width-2;
+
+    messagearea_height = playarea_height - 2;
+    messagearea_width = playarea_width - 2;
+
 }
 
 void Game::refreshAll() {
+    //refresh();
     wrefresh(playarea);
     wrefresh(infoarea);
-    refresh();
 }
 
 int Game::getHeight() {
@@ -51,8 +53,10 @@ void Game::setScore(int s) {
     score = s;
     std::string score_str = std::to_string(s);
     wmove(infoarea, 1, 1);
+    wdeleteln(infoarea);
     waddstr(infoarea, "score: ");
     waddstr(infoarea, score_str.c_str());
+    box(infoarea, ACS_VLINE, ACS_HLINE);
 }
 
 void Game::setLevel(int l){
@@ -90,13 +94,10 @@ void Game::showMessage(std::string message){
                                  window_height/2 - (messagearea_height/2),
                                  window_width/2 - (messagearea_width/2));
 
-    box(messagearea, ACS_VLINE, ACS_HLINE);
     wmove(messagearea, 1, 1);
     waddstr(messagearea, message.c_str());
-    wmove(messagearea,0,0);
-    wmove(messagearea, messagearea_height-1, (messagearea_width - message.length()) / 3);
+    waddstr(messagearea, "\n premi invio.");
     box(messagearea, ACS_VLINE, ACS_HLINE);
-    waddstr(messagearea, "press any button to continue.");
     wrefresh(messagearea);
     refreshAll();
     getch();
@@ -134,15 +135,18 @@ void Game::generateLevel(int level, int y_start, int y_dist, bool cont=false) {
          //generate the level randomly
          x = rand() % playarea_width;
          y = y_start + ((i + 1) * y_dist);
-         points = level * 10;
 
          rnd = rand() % 10;
-         if (rnd <= 3)
-             obj = (Object * )(new Car(x, y, -points * 2));
-         else if (rnd <= 7)
-             obj = (Object * )(new Obstacle(x, y, -points));
-         else
-             obj = (Object * )(new Powerup(x, y, points));
+         if (rnd <= 2) {
+             points = -200;
+             obj = (Object *) (new Car(x, y, points));
+         } else if (rnd <= 6) {
+             points = -150;
+             obj = (Object *) (new Obstacle(x, y, points));
+         } else {
+             points = 100;
+             obj = (Object *) (new Powerup(x, y, points));
+         }
 
          obj->setActive(true);
          L[i] = (Object *) obj;
@@ -153,7 +157,7 @@ void Game::generateLevel(int level, int y_start, int y_dist, bool cont=false) {
 
 void Game::init() {
     setBaseSeed(time(0));
-    level = 15;
+    level = 1;
     score = 0;
 
     //initialize window
@@ -169,6 +173,12 @@ void Game::init() {
     curs_set(0);
     noecho();
 
+    //initialize color pairs
+    init_pair(PLAYER_PAIR, COLOR_RED, COLOR_WHITE);
+    init_pair(CAR_PAIR, COLOR_BLUE, COLOR_BLACK);
+    init_pair(OBSTACLE_PAIR, COLOR_WHITE, COLOR_WHITE);
+    init_pair(POWERUP_PAIR, COLOR_GREEN, COLOR_BLACK);
+
     //initialize playarea
     playarea = newwin(playarea_height, playarea_width, 1, 1);
     box(playarea, ACS_VLINE, ACS_HLINE);
@@ -179,22 +189,24 @@ void Game::init() {
     //initialize infoarea
     infoarea = newwin(infoarea_height, infoarea_width, playarea_height + 1, 1);
     box(infoarea, ACS_VLINE, ACS_HLINE);
-    setScore(score);
-    setLevel(level);
 
     refreshAll();
-    showMessage("X = ostacoli\n O = powerup\n A = automobili\n raggiungi il punteggio prestabilito\n per salire di livello!");
+    showMessage("O +100 punti\n X -150 punti\n A -200 punti\n ogni 1000 punti sali di\n un livello.\n buona fortuna!");
 
     //generate level
     generateLevel(level, getYStart(level), getYDist(level));
 
+    setScore(0);
+    setLevel(1);
     refresh();
 }
 
 void Game::drawObject(WINDOW *w, Object obj) {
     Position pos = Utilities::to_ncurses_coord(playarea, obj.getPosition());
     wmove(w, pos.y, pos.x);
+    wattron(w, COLOR_PAIR(obj.getColorPair()));
     waddch(w, obj.getCharacter());
+    wattroff(w, COLOR_PAIR(obj.getColorPair()));
 }
 
 [[noreturn]] void Game::start() {
@@ -218,16 +230,20 @@ void Game::drawObject(WINDOW *w, Object obj) {
         werase(playarea);
         box(playarea, ACS_VLINE, ACS_HLINE);
 
+        //move player based on input
         if (input.isPressed(KEY_RIGHT))
             player->move(Position(1, 0));
         if (input.isPressed(KEY_LEFT))
             player->move(Position(-1, 0));
 
+        //draw player
         drawObject(playarea, *player);
 
+        //for each object
         for (int i = 0; i < obj_n; i++) {
             curr_obj = ObjArray[i];
 
+            //check if active or needs to be deactivated
             if (!curr_obj->isActive())
                 continue;
 
@@ -236,6 +252,7 @@ void Game::drawObject(WINDOW *w, Object obj) {
                 continue;
             }
 
+            //check that it is on screen
             if (curr_obj->getPosition().y > min_y && curr_obj->getPosition().y < max_y) {
                 if ((y_scroll - (int) y_scroll <= 1e-3) && (int) y_scroll % 2 == 0
                     && curr_obj->getType() == Object::Type::Car) { //move the cars forward and randomly left or right
@@ -246,19 +263,36 @@ void Game::drawObject(WINDOW *w, Object obj) {
                         c->move(Position(1, 1));
                     else if (!dir && c->getPosition().x != 1)
                         c->move(Position(-1, 1));
-
                 }
+
+                //check player collision with the object
+                if (player->translate(Position(0,y_scroll)).isColliding(*curr_obj)){
+                    if(curr_obj->getType() == Object::Type::Powerup)
+                        player->addLife();
+                    else
+                        player->removeLife();
+
+                    score += curr_obj->getPoints();
+                    curr_obj->setActive(false);
+                }
+                //draw the object
                 drawObject(playarea, (curr_obj->translate(Position(0, -(int)y_scroll))));
             }
         }
 
+        //if we're getting to the end of the generated portion of the level, generate more of it
         if (y_scroll > (getYStart(level) + (getYDist(level) * OBJ_PER_LEVEL)) - getYDist(level) * 10) {
             generateLevel(level, getYStart(level), getYDist(level), true);
             y_scroll = 0;
         }
 
+        //scroll the screen
         y_scroll += y_speed * (level / 5.0) + 0.2;
-        setScore((int) y_scroll);
+
+        setScore(score);
+        level = (score / 1000) + 1;
+        setLevel(level);
+        //sleep to mantain constant framerate;
         auto t2 = std::chrono::high_resolution_clock::now();
         delta_t = std::chrono::duration<double, std::milli>(t2 - t1).count();
         Utilities::sleep_for(sleep_ms - delta_t);

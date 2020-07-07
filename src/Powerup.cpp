@@ -5,6 +5,7 @@ Powerup::Powerup(int x, int y, int points){
     this->points = points;
     this->pos = Position(x, y);
     this->character = 'O';
+    this->color_pair = POWERUP_PAIR;
 }
 
 void Powerup::setPoints(int p) {
