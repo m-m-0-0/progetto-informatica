@@ -6,10 +6,6 @@
 class Obstacle : public Object {
 public:
     Obstacle(int x, int y, int score);
-
-    void setPoints(int s);
-    int getPoints();
-
 };
 
 

@@ -6,9 +6,5 @@
 class Powerup : public Object {
 public:
     Powerup(int x, int y, int score);
-
-    void setPoints(int s);
-    int getPoints();
-
 };
 #endif //UNTITLED_OBSTACLE_H

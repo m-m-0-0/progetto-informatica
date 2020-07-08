@@ -4,6 +4,7 @@
 Player::Player(int x, int y, int life) {
     this->pos = Position(x,y);
     this->life = life;
+    this->max_life = life;
     this->character = ACS_DIAMOND;
     this->color_pair = PLAYER_PAIR;
 }
@@ -17,7 +18,7 @@ void Player::setLife(int l) {
 }
 
 void Player::addLife() {
-    if(life < 10)
+    if(life < max_life)
         life++;
 }
 

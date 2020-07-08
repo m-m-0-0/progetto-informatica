@@ -18,6 +18,7 @@ public:
 
 protected:
     int life;
+    int max_life;
 };
 
 #endif //UNTITLED_PLAYER_H
