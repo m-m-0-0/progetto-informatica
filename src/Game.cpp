@@ -32,7 +32,6 @@ Game::Game(int w_y, int w_x){
 }
 
 void Game::refreshAll() {
-    //refresh();
     wrefresh(playarea);
     wrefresh(infoarea);
 }
@@ -103,19 +102,18 @@ void Game::showMessage(std::string message){
                                  messagearea_width,
                                  window_height/2 - (messagearea_height/2),
                                  window_width/2 - (messagearea_width/2));
-
+    touchwin(messagearea);
+    wrefresh(messagearea);
     wmove(messagearea, 1, 1);
     waddstr(messagearea, message.c_str());
     waddstr(messagearea, "\n premi invio.");
     box(messagearea, ACS_VLINE, ACS_HLINE);
     wrefresh(messagearea);
-    refreshAll();
     getch();
     delwin(messagearea);
     touchwin(playarea);
     touchwin(infoarea);
     nodelay(stdscr, true);
-    refreshAll();
 }
 
 void Game::generateLevel(int level, bool cont=false, bool first=false) {
@@ -136,32 +134,33 @@ void Game::generateLevel(int level, bool cont=false, bool first=false) {
     int rnd, x, y, points;
 
     int active_n = 0;
-     for(int i=0; i<n; i++) {
-         if (!first && ObjArray[i]->isActive()) {
-             ObjArray[i]->setPosition(ObjArray[i]->getPosition() + Position(0, -y_scroll));
-             L[active_n++] = ObjArray[i];
-         }
-     }
-     for(int i=active_n; i<n; i++){
-         //generate the level randomly
-         x = (rand() % (playarea_width - 2)) + 1;
-         y = y_start + ((i + 1) * y_dist);
+    if(!first) {
+        for (int i = 0; i < n; i++) {
+            if (ObjArray[i]->isActive()) {
+                ObjArray[i]->setPosition(ObjArray[i]->getPosition() + Position(0, -y_scroll));
+                L[active_n++] = ObjArray[i];
+            }
+        }
+    }
+    for(int i=active_n; i<n; i++){
+        //generate the level randomly
+        x = (rand() % (playarea_width - 2)) + 1;
+        y = y_start + ((i + 1) * y_dist);
 
-         rnd = rand() % 10;
-         if (rnd <= 2) {
+        rnd = rand() % 10;
+        if (rnd <= 2) {
              points = -200;
              obj = (Object *) (new Car(x, y, points));
-         } else if (rnd <= 6) {
+        } else if (rnd <= 6) {
              points = -150;
              obj = (Object *) (new Obstacle(x, y, points));
-         } else {
+        } else {
              points = 100;
              obj = (Object *) (new Powerup(x, y, points));
-         }
-
-         obj->setActive(true);
-         L[i] = (Object *) obj;
-     }
+        }
+        obj->setActive(true);
+        L[i] = (Object *) obj;
+    }
     ObjArray = L;
     obj_n = n;
 }
@@ -203,11 +202,12 @@ void Game::init() {
     refreshAll();
     showMessage("O +100 punti\n X -150 punti\n A -200 punti\n ogni 1000 punti sali di\n un livello.\n buona fortuna!");
 
+    setScore(0);
+    setLevel(1);
+
     //generate level
     generateLevel(level, false, true);
 
-    setScore(0);
-    setLevel(1);
     refresh();
 }
 
@@ -222,7 +222,7 @@ void Game::drawObject(WINDOW *w, Object obj) {
 [[noreturn]] void Game::start() {
     init();
     y_scroll = 0;
-    player = new Player(playarea_width / 2, 2, 10);
+    player = new Player(playarea_width / 2, 2, 4);
 
     Object *curr_obj;
     double sleep_ms = (double) 1 / FPS;
@@ -240,11 +240,17 @@ void Game::drawObject(WINDOW *w, Object obj) {
         werase(playarea);
         box(playarea, ACS_VLINE, ACS_HLINE);
 
+        //check if player is still alive or if score < 0
+        if(player->isDead() || score < 0)
+            break;
+
         //move player based on input
         if (input.isPressed(KEY_RIGHT))
             player->move(Position(1, 0));
         if (input.isPressed(KEY_LEFT))
             player->move(Position(-1, 0));
+        if (input.isPressed(KEY_ENTER))
+            showMessage("pausa");
 
         //draw player
         drawObject(playarea, *player);
@@ -300,10 +306,13 @@ void Game::drawObject(WINDOW *w, Object obj) {
         y_scroll += y_speed * (level / 5.0) + 0.2;
 
         setScore(score);
-        if(score / 100 + 1 != level) {
-            setLevel(score / 100 + 1);
+        if(score / 500 + 1 != level) {
+            setLevel(score / 500 + 1);
             generateLevel(level);
         }
+
+        if(score > highscore)
+            highscore = score;
 
         updateLife(player->getLife());
 
@@ -313,5 +322,6 @@ void Game::drawObject(WINDOW *w, Object obj) {
         Utilities::sleep_for(sleep_ms - delta_t);
         refreshAll();
     }
-    getch();
+    std::string highscore_str = std::to_string(highscore);;
+    showMessage(" Game Over!\n High score: " + highscore_str);
 }

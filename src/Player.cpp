@@ -25,3 +25,7 @@ void Player::removeLife() {
     if(life > 0)
         life--;
 }
+
+bool Player::isDead() {
+    return life == 0;
+}

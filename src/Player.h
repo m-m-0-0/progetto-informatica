@@ -14,6 +14,7 @@ public:
 
     void addLife();
     void removeLife();
+    bool isDead();
 
 protected:
     int life;
