@@ -16,6 +16,7 @@ private:
     int score;
     int highscore = 0;
     long int base_seed;
+    int frame = 1;
 
     int window_width;
     int window_height;

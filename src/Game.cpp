@@ -10,10 +10,9 @@
 #include "Player.h"
 #include <chrono>
 
-
 const int Y_START = 1;
 const int Y_DIST = 10;
-const int OBJ_PER_LEVEL = 100;
+const int OBJ_PER_LEVEL = 60;
 const int FPS = 30;
 
 Game::Game(int w_y, int w_x){
@@ -122,6 +121,7 @@ void Game::generateLevel(int level, bool cont=false, bool first=false) {
     L = new Object *[n];
     int y_start = getYStart(level);
     int y_dist = getYDist(level);
+
     //if not a continuation of the current level, set the rand seed to the level seed.
     //this is done to make sure each level is generated randomly, but that each level
     //will be generated in the same way for the same execution of the game.
@@ -159,7 +159,7 @@ void Game::generateLevel(int level, bool cont=false, bool first=false) {
              obj = (Object *) (new Powerup(x, y, points));
         }
         obj->setActive(true);
-        L[i] = (Object *) obj;
+        L[i] = obj;
     }
     ObjArray = L;
     obj_n = n;
@@ -200,7 +200,7 @@ void Game::init() {
     box(infoarea, ACS_VLINE, ACS_HLINE);
 
     refreshAll();
-    showMessage("O +100 punti\n X -150 punti\n A -200 punti\n ogni 1000 punti sali di\n un livello.\n buona fortuna!");
+    showMessage("O +100 punti\n X -150 punti\n A -200 punti\n ogni 500 punti sali di\n un livello.\n buona fortuna!");
 
     setScore(0);
     setLevel(1);
@@ -251,6 +251,10 @@ void Game::drawObject(WINDOW *w, Object obj) {
             player->move(Position(-1, 0));
         if (input.isPressed(KEY_ENTER))
             showMessage("pausa");
+        if (input.isPressed(KEY_UP))
+            setScore(score + 500);
+        if(input.isPressed(KEY_DOWN))
+            setScore(score - 500);
 
         //draw player
         drawObject(playarea, *player);
@@ -270,7 +274,7 @@ void Game::drawObject(WINDOW *w, Object obj) {
 
             //check that it is on screen
             if (curr_obj->getPosition().y > min_y && curr_obj->getPosition().y < max_y) {
-                if ((y_scroll - (int) y_scroll <= 1e-3) && (int) y_scroll % 2 == 0
+                if (frame % (int)(y_speed * FPS * 2) == 0
                     && curr_obj->getType() == Object::Type::Car) { //move the cars forward and randomly left or right
                     Car *c = (Car *) curr_obj;
                     int dir = rand() % 2;
@@ -305,16 +309,19 @@ void Game::drawObject(WINDOW *w, Object obj) {
         //scroll the screen
         y_scroll += y_speed * (level / 5.0) + 0.2;
 
+        //check what level we're on
         setScore(score);
         if(score / 500 + 1 != level) {
             setLevel(score / 500 + 1);
             generateLevel(level);
+            y_scroll = 0;
         }
 
         if(score > highscore)
             highscore = score;
 
         updateLife(player->getLife());
+        frame++;
 
         //sleep to mantain constant framerate;
         auto t2 = std::chrono::high_resolution_clock::now();
@@ -324,4 +331,5 @@ void Game::drawObject(WINDOW *w, Object obj) {
     }
     std::string highscore_str = std::to_string(highscore);;
     showMessage(" Game Over!\n High score: " + highscore_str);
+    exit(0);
 }
