@@ -1,5 +1,5 @@
-#ifndef UNTITLED_OBSTACLE_H
-#define UNTITLED_OBSTACLE_H
+#ifndef OBJECT_OBSTACLE_H
+#define OBJECT_OBSTACLE_H
 
 #include "Object.h"
 
@@ -9,4 +9,4 @@ public:
 };
 
 
-#endif //UNTITLED_OBSTACLE_H
+#endif

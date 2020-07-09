@@ -5,8 +5,8 @@
 
 class Input {
 public:
-    int* getInput();
-    bool isPressed(int);
+    void getInput();
+    bool isPressed(int key);
     void clearInputBuffer();
 
 private:
@@ -15,4 +15,4 @@ private:
 };
 
 
-#endif //RACING_INPUT_H
+#endif

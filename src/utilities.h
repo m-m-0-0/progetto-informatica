@@ -8,9 +8,8 @@
 #include "../include/curses.h"
 class Utilities {
 public:
-    static void sleep_for(double);
+    static void sleep_for(double ms);
     static Position to_ncurses_coord(WINDOW *, Position);
 };
 
-
-#endif //RACING_UTILITIES_H
+#endif

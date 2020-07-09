@@ -1,5 +1,5 @@
-#ifndef GAME_OBJECT_H
-#define GAME_OBJECT_H
+#ifndef OBJECT_GAME_H
+#define OBJECT_GAME_H
 
 #include "../include/curses.h"
 #include "Object.h"
@@ -41,30 +41,25 @@ private:
 public:
     Game(int, int);
     void init();
-    void generateLevel(int, bool);
+    void generateLevel(int level, bool cont, bool first);
     void refreshAll();
-    void drawObject(WINDOW*, Object);
+    void drawObject(WINDOW* w, Object obj);
 
-    int getHeight();
-    int getWidth();
-
-    WINDOW* getDefaultWindow();
-
-    void setScore(int);
-    void setLevel(int);
     int getBaseSeed();
     void setBaseSeed(int seed);
-    int getLevelSeed(int);
-    int getYStart(int);
-    int getYDist(int);
+    int getLevelSeed(int level);
+    int getYStart(int level);
+    int getYDist(int level);
 
-    void showMessage(std::string);
+    void showMessage(std::string message);
 
     [[noreturn]] void start();
 
     void updateLife(int l);
+    void updateLevel(int l);
+    void updateScore(int s);
 
-    void generateLevel(int level, bool cont, bool first);
+    void showStartMessage();
 };
 
-#endif //GAME_OBJECT_H
+#endif

@@ -1,6 +1,6 @@
 #include "Input.h"
 
-int* Input::getInput(){
+void Input::getInput(){
     int* Tmp = new int[100]{-1};
     int c;
     int i=0;

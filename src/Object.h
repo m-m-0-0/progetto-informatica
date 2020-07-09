@@ -1,5 +1,6 @@
 #ifndef OBJECT_OBJECT_H
 #define OBJECT_OBJECT_H
+
 #include "Position.h"
 
 const int PLAYER_PAIR = 0;
@@ -19,13 +20,13 @@ public:
     Object(Type type, int x, int y, int points, unsigned long character);
 
     Type getType();
-    void setType(Type);
+    void setType(Type t);
     Position getPosition();
-    void setPosition(Position);
+    void setPosition(Position pos);
     int getPoints();
-    void setPoints(int);
+    void setPoints(int p);
     unsigned long getCharacter();
-    void setCharacter(unsigned long);
+    void setCharacter(unsigned long c);
     int getColorPair();
     void setColorPair(int);
     bool isActive();

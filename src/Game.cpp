@@ -12,7 +12,7 @@
 
 const int Y_START = 1;
 const int Y_DIST = 10;
-const int OBJ_PER_LEVEL = 60;
+const int OBJ_PER_LEVEL = 100;
 const int FPS = 30;
 
 Game::Game(int w_y, int w_x){
@@ -35,46 +35,32 @@ void Game::refreshAll() {
     wrefresh(infoarea);
 }
 
-int Game::getHeight() {
-    return playarea_height;
-}
-
-int Game::getWidth() {
-    return playarea_width;
-}
-
-WINDOW* Game::getDefaultWindow(){
-    return stdscr;
-}
-
-void Game::setScore(int s) {
+void Game::updateScore(int s) {
     score = s;
     std::string score_str = std::to_string(s);
-    wmove(infoarea, 1, 1);
+    wmove(infoarea, 3, 1);
     wdeleteln(infoarea);
-    waddstr(infoarea, "score: ");
+    waddstr(infoarea, "score:\t");
     waddstr(infoarea, score_str.c_str());
-    box(infoarea, ACS_VLINE, ACS_HLINE);
 }
 
-void Game::setLevel(int l){
+void Game::updateLevel(int l){
     level = l;
     std::string level_str = std::to_string(l);
     wmove(infoarea, 2, 1);
     wdeleteln(infoarea);
-    waddstr(infoarea, "level: ");
+    waddstr(infoarea, "level:\t");
     waddstr(infoarea, level_str.c_str());
-    box(infoarea, ACS_VLINE, ACS_HLINE);
 }
 
 void Game::updateLife(int l){
     std::string life_str = std::to_string(l);
-    wmove(infoarea, 3, 1);
+    wmove(infoarea, 1, 1);
     wdeleteln(infoarea);
-    waddstr(infoarea, "life: ");
+    waddstr(infoarea, "life:\t");
     waddstr(infoarea, life_str.c_str());
-    box(infoarea, ACS_VLINE, ACS_HLINE);
 }
+
 int Game::getBaseSeed(){
     return base_seed;
 }
@@ -84,7 +70,7 @@ void Game::setBaseSeed(int seed){
 }
 
 int Game::getLevelSeed(int level){
-    return base_seed + level - 1;
+    return getBaseSeed() + level - 1;
 }
 
 int Game::getYStart(int level) {
@@ -178,15 +164,8 @@ void Game::init() {
     raw();
     nodelay(stdscr, true);
     keypad(stdscr, true);
-    start_color();
     curs_set(0);
     noecho();
-
-    //initialize color pairs
-    init_pair(PLAYER_PAIR, COLOR_RED, COLOR_WHITE);
-    init_pair(CAR_PAIR, COLOR_BLUE, COLOR_BLACK);
-    init_pair(OBSTACLE_PAIR, COLOR_WHITE, COLOR_WHITE);
-    init_pair(POWERUP_PAIR, COLOR_GREEN, COLOR_BLACK);
 
     //initialize playarea
     playarea = newwin(playarea_height, playarea_width, 1, 1);
@@ -200,10 +179,12 @@ void Game::init() {
     box(infoarea, ACS_VLINE, ACS_HLINE);
 
     refreshAll();
-    showMessage("O +100 punti\n X -150 punti\n A -200 punti\n ogni 500 punti sali di\n un livello.\n buona fortuna!");
+    //showMessage("@\t+100 punti\n ▓\t-150 punti\n A\t-200 punti\n ogni 500 punti sali di\n un livello.\n ");
+    showStartMessage();
+    showMessage("uscire dalla strada\n ti fara' perdere\n punti, fai attenzione!\n muoviti con le frecce\n sinistra e destra.\n\n Creato da:\n Anselmo Ferrari\n Francesco Maria Vaccari\n Mauro Molari\n");
 
-    setScore(0);
-    setLevel(1);
+    score = 0;
+    level = 1;
 
     //generate level
     generateLevel(level, false, true);
@@ -214,9 +195,31 @@ void Game::init() {
 void Game::drawObject(WINDOW *w, Object obj) {
     Position pos = Utilities::to_ncurses_coord(playarea, obj.getPosition());
     wmove(w, pos.y, pos.x);
-    wattron(w, COLOR_PAIR(obj.getColorPair()));
     waddch(w, obj.getCharacter());
-    wattroff(w, COLOR_PAIR(obj.getColorPair()));
+}
+
+void Game::showStartMessage(){
+    nodelay(stdscr, false);
+    WINDOW* messagearea = newwin(messagearea_height,
+                                 messagearea_width,
+                                 window_height/2 - (messagearea_height/2),
+                                 window_width/2 - (messagearea_width/2));
+    touchwin(messagearea);
+    wrefresh(messagearea);
+    wmove(messagearea, 1, 1);
+    std::string message1 = "@\t+100 punti\n ";
+    std::string message2 = "\t-200 punti\n A\t-150 punti\n ogni 500 punti sali di\n un livello.\n ";
+    waddstr(messagearea, message1.c_str());
+    waddch(messagearea, ACS_CKBOARD);
+    waddstr(messagearea, message2.c_str());
+    waddstr(messagearea, "\n premi invio.");
+    box(messagearea, ACS_VLINE, ACS_HLINE);
+    wrefresh(messagearea);
+    getch();
+    delwin(messagearea);
+    touchwin(playarea);
+    touchwin(infoarea);
+    nodelay(stdscr, true);
 }
 
 [[noreturn]] void Game::start() {
@@ -251,10 +254,15 @@ void Game::drawObject(WINDOW *w, Object obj) {
             player->move(Position(-1, 0));
         if (input.isPressed(KEY_ENTER))
             showMessage("pausa");
+#ifdef DEBUG
         if (input.isPressed(KEY_UP))
-            setScore(score + 500);
+            score += 500;
         if(input.isPressed(KEY_DOWN))
-            setScore(score - 500);
+            score -= 500;
+#endif
+        //check if player is outside of bounds and remove one points if it is
+        if(player->getPosition().x < 1 || player->getPosition().x >= playarea_width - 1)
+            score--;
 
         //draw player
         drawObject(playarea, *player);
@@ -292,7 +300,7 @@ void Game::drawObject(WINDOW *w, Object obj) {
                     else
                         player->removeLife();
 
-                    setScore(score + curr_obj->getPoints());
+                   score += curr_obj->getPoints();
                     curr_obj->setActive(false);
                 }
                 //draw the object
@@ -301,7 +309,7 @@ void Game::drawObject(WINDOW *w, Object obj) {
         }
 
         //if we're getting to the end of the generated portion of the level, generate more of it
-        if (y_scroll > (getYStart(level) + (getYDist(level) * OBJ_PER_LEVEL)) - getYDist(level) * 10) {
+        if (y_scroll + 100> (getYStart(level) + (getYDist(level) * OBJ_PER_LEVEL)) - getYDist(level) * 10) {
             generateLevel(level, true, false);
             y_scroll = 0;
         }
@@ -310,9 +318,8 @@ void Game::drawObject(WINDOW *w, Object obj) {
         y_scroll += y_speed * (level / 5.0) + 0.2;
 
         //check what level we're on
-        setScore(score);
         if(score / 500 + 1 != level) {
-            setLevel(score / 500 + 1);
+            level = score / 500 + 1;
             generateLevel(level);
             y_scroll = 0;
         }
@@ -320,7 +327,11 @@ void Game::drawObject(WINDOW *w, Object obj) {
         if(score > highscore)
             highscore = score;
 
+        wclear(infoarea);
         updateLife(player->getLife());
+        updateLevel(level);
+        updateScore(score);
+        box(infoarea, ACS_VLINE, ACS_HLINE);
         frame++;
 
         //sleep to mantain constant framerate;

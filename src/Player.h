@@ -1,6 +1,5 @@
-
-#ifndef UNTITLED_PLAYER_H
-#define UNTITLED_PLAYER_H
+#ifndef OBJECT_PLAYER_H
+#define OBJECT_PLAYER_H
 
 
 #include "Object.h"
@@ -8,17 +7,17 @@
 
 class Player : public Car {
 public:
-    Player(int, int, int);
+    Player(int x, int y, int life);
     int getLife();
-    void setLife(int);
+    void setLife(int l);
 
     void addLife();
     void removeLife();
     bool isDead();
 
-protected:
+private:
     int life;
     int max_life;
 };
 
-#endif //UNTITLED_PLAYER_H
+#endif
